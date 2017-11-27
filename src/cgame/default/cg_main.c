@@ -21,14 +21,7 @@
 
 #include "cg_local.h"
 
-/**
- * @brief Local state to the cgame per server.
- */
-typedef struct {
-	vec_t hook_pull_speed;
-} cg_state_t;
-
-static cg_state_t cg_state;
+cg_state_t cg_state;
 
 cvar_t *cg_add_emits;
 cvar_t *cg_add_entities;
@@ -272,6 +265,8 @@ static void Cg_Init(void) {
 
 	Cg_InitHud();
 
+	Cg_InitDiscord();
+
 	cgi.Print("  ^6Client game module initialized\n");
 }
 
@@ -283,6 +278,8 @@ static void Cg_Shutdown(void) {
 	cgi.Print("  ^6Client game module shutdown...\n");
 
 	Cg_ShutdownUi();
+
+	Cg_ShutdownDiscord();
 
 	cgi.FreeTag(MEM_TAG_CGAME_LEVEL);
 	cgi.FreeTag(MEM_TAG_CGAME);
@@ -329,14 +326,6 @@ static void Cg_UpdateScreen(const cl_frame_t *frame) {
 	Cg_DrawHud(&frame->ps);
 
 	Cg_DrawScores(&frame->ps);
-}
-
-/**
- * @brief Fetch the server's reported hook pull speed.
- */
-vec_t Cg_GetHookPullSpeed(void) {
-
-	return cg_state.hook_pull_speed;
 }
 
 /**
@@ -403,6 +392,24 @@ static void Cg_UpdateConfigString(uint16_t i) {
 		case CS_WEAPONS:
 			Cg_ParseWeaponInfo(s);
 			return;
+		case CS_GAMEPLAY:
+			cg_state.gameplay = (g_gameplay_t) strtol(s, NULL, 10);
+			return;
+		case CS_CTF:
+			cg_state.ctf = (_Bool) strtol(s, NULL, 10);
+			return;
+		case CS_TEAMS:
+			cg_state.teams = (uint8_t) strtol(s, NULL, 10);
+			return;
+		case CS_MATCH:
+			cg_state.match = (_Bool) strtol(s, NULL, 10);
+			return;
+		case CS_MAXCLIENTS:
+			cg_state.maxclients = (uint8_t) strtol(s, NULL, 10);
+			return;
+		case CS_NUMCLIENTS:
+			cg_state.numclients = (uint8_t) strtol(s, NULL, 10);
+			return;
 		default:
 			break;
 	}
@@ -444,6 +451,7 @@ cg_export_t *Cg_LoadCgame(cg_import_t *import) {
 	cge.UpdateLoading = Cg_UpdateLoading;
 	cge.UpdateView = Cg_UpdateView;
 	cge.UpdateScreen = Cg_UpdateScreen;
+	cge.UpdateDiscord = Cg_UpdateDiscord;
 
 	return &cge;
 }

@@ -42,6 +42,11 @@ typedef struct cg_import_s {
 	const cl_state_t *state;
 
 	/**
+	 * @brief The server name we're connecting/connected to.
+	 */
+	const char *server_name;
+
+	/**
 	 * @brief The renderer context.
 	 */
 	const r_context_t *context;
@@ -792,6 +797,7 @@ typedef struct cg_export_s {
 	void (*UpdateLoading)(const cl_loading_t loading);
 	void (*UpdateView)(const cl_frame_t *frame);
 	void (*UpdateScreen)(const cl_frame_t *frame);
+	void (*UpdateDiscord)(void);
 
 } cg_export_t;
 
